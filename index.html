@@ -22,7 +22,64 @@
 <body>
     <!-- Everything inside #app is controlled by Vue (js/app.js mounts here) -->
     <div id="app" class="container py-4">
+
+        <!-- ============================== HEADER ============================== -->
         <h1>{{ sitename }}</h1>
+
+        <!-- TODO Country choice (extra): a "Switch country" button (v-on:click -> switchCountry),
+               shown only once a country has been chosen. -->
+
+        <!-- TODO Shopping cart (5%): the cart button.
+               - shows the number of spaces in the cart (cartCount)
+               - v-bind:disabled -> disabled until at least 1 space is in the cart
+               - v-on:click -> toggleCartPage (the same button goes to the cart and back) -->
+
+
+        <!-- ========================== COUNTRY QUESTION ======================== -->
+
+        <!-- TODO Country choice (extra): shown only while no country is chosen (v-if).
+               "Where are you?" with two buttons, UAE and UK.
+               Each button calls chooseCountry with its country. -->
+
+
+        <!-- ============================ LESSONS PAGE ========================== -->
+
+        <!-- TODO Lessons page: shown when a country is chosen AND the cart page is not showing (v-if / v-else). -->
+
+            <!-- TODO Search challenge (6%): a text box bound with v-model to the search text;
+                   typing (or a Search button) calls searchLessons. -->
+
+            <!-- TODO Teachers challenge (8%): a drop-down (select) of the teachers;
+                   choosing one calls fetchTeacherLessons with that teacher's ID,
+                   plus an option to show all lessons again. -->
+
+            <!-- TODO Sort (8%): two drop-downs bound with v-model:
+                   1. sort by: Subject / Location / Price / Spaces  (values: topic, location, price, space)
+                   2. order:   Ascending / Descending -->
+
+            <!-- TODO Lesson list (7%): one card per lesson, using v-for over sortedLessons (give each a :key).
+                   Each card shows:
+                     - the image:  v-bind:src = API_URL + '/images/' + lesson.image
+                     - Subject (lesson.topic), Location, Price with its currency, Spaces left
+                     - the "Add to cart" button (5%):
+                         always visible
+                         v-bind:disabled -> disabled when canAddToCart(lesson) is false
+                         v-on:click      -> addToCart(lesson) -->
+
+
+        <!-- ============================== CART PAGE =========================== -->
+
+        <!-- TODO Cart page (5%): shown when the cart page is selected (the v-else of the lessons page).
+               - every lesson in the cart (v-for over cartLessons): subject, location, price
+               - a Remove button on each (v-on:click -> removeFromCart with its position) -->
+
+            <!-- TODO Checkout (6%): on the cart page only, NOT on the lessons page.
+                   - Name input  (v-model), letters only
+                   - Phone input (v-model), digits only
+                   - Checkout button: always visible; v-bind:disabled -> disabled until canCheckout
+                   - v-on:click -> submitOrder
+                   - after a successful order: show the confirmation message -->
+
     </div>
 
     <script src="js/app.js"></script>
