@@ -179,6 +179,12 @@ const app = Vue.createApp({
         //   fetch API_URL + '/teachers?country=' + the country, and store the list for the picker.
         fetchTeachers() {},
 
+        // TODO Teachers challenge (8%): filterByTeacher()
+        //   Runs when the teacher picker changes (v-model has already updated the selected teacher).
+        //   1. If "All Teachers" is selected (an empty value), show the full list again (fetchLessons) and stop.
+        //   2. Otherwise show only that teacher's lessons (fetchTeacherLessons with the selected ID).
+        filterByTeacher() {},
+
         // TODO Teachers challenge (8%): fetchTeacherLessons(teacherId)
         //   1. fetch API_URL + '/teachers/' + teacherId + '/lessons'.
         //   2. Show those lessons in the list (and a way to go back to all lessons).
