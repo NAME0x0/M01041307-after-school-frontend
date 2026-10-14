@@ -12,6 +12,7 @@
     --lesson-muted: #536276;
     --lesson-border: #d9e1eb;
     --lesson-focus: #193f71;
+    --lesson-rating: #8a5a00;
 }
 
 /* Keep Bootstrap's system font and add a calm background with readable text. */
@@ -56,7 +57,8 @@ body {
 /* Add an obvious keyboard outline alongside Bootstrap's own focus styles. */
 #app .btn:focus-visible,
 #app .form-control:focus-visible,
-#app .form-select:focus-visible {
+#app .form-select:focus-visible,
+#app .lesson-help summary:focus-visible {
     outline: 3px solid var(--lesson-focus);
     outline-offset: 3px;
 }
@@ -85,6 +87,82 @@ body {
 
 #app .card-body .btn {
     margin-top: 0.5rem;
+}
+
+/* Ratings include a text score as well as the five star icons. */
+#app .lesson-rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#app .rating-stars {
+    display: inline-flex;
+    gap: 0.2rem;
+    color: var(--lesson-rating);
+}
+
+#app .rating-caption {
+    font-size: 0.875rem;
+    color: var(--lesson-muted);
+}
+
+/* Native details elements provide help without extra JavaScript. */
+#app .lesson-help summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    color: var(--lesson-focus);
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+#app .lesson-help summary::-webkit-details-marker {
+    display: none;
+}
+
+#app .lesson-help p {
+    margin: 0.25rem 0 0;
+    color: var(--lesson-muted);
+}
+
+/* Blank shapes show the card layout without lesson data or actions. */
+#app .lesson-placeholder-title,
+#app .lesson-placeholder-rating,
+#app .lesson-placeholder-line,
+#app .lesson-placeholder-button {
+    border-radius: 0.25rem;
+    background-color: var(--lesson-border);
+}
+
+#app .lesson-placeholder-title {
+    width: 60%;
+    height: 1.25rem;
+}
+
+#app .lesson-placeholder-rating {
+    width: 7rem;
+    height: 0.875rem;
+}
+
+#app .lesson-placeholder-line {
+    width: 75%;
+    height: 0.75rem;
+}
+
+#app .lesson-placeholder-button {
+    width: 8rem;
+    height: 2.75rem;
+    margin-top: 0.5rem;
+}
+
+/* Fade empty cards after a failed load to distinguish them from loading. */
+#app .lesson-placeholders-failed {
+    opacity: 0.6;
 }
 
 /* Use consistent image heights on small screens; cover can crop image edges. */
