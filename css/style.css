@@ -1,4 +1,126 @@
 /*
- * css/style.css: own styles.
- * Loaded after Bootstrap in index.html, so a rule here wins over Bootstrap's.
+ * css/style.css: small, documented additions to Bootstrap's CSS.
+ * Bootstrap supplies the grid, buttons and form components.
+ * These rules add page colours, card sizing and keyboard focus indicators.
  */
+
+/* Shared colours keep the scaffold easy to adjust without repeating values. */
+:root {
+    --lesson-page-bg: #f3f6fa;
+    --lesson-surface: #ffffff;
+    --lesson-text: #243247;
+    --lesson-muted: #536276;
+    --lesson-border: #d9e1eb;
+    --lesson-focus: #193f71;
+}
+
+/* Keep Bootstrap's system font and add a calm background with readable text. */
+body {
+    background-color: var(--lesson-page-bg);
+    color: var(--lesson-text);
+    line-height: 1.6;
+}
+
+/* Limit long lines while retaining Bootstrap's centred, responsive container. */
+#app {
+    max-width: 960px;
+}
+
+/* The header separates the page title and navigation from the content; Bootstrap handles wrapping. */
+#app > .site-header {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--lesson-border);
+}
+
+#app h1 {
+    font-weight: 700;
+}
+
+/* Country selection and checkout panels share a white surface and border colour. */
+#app .panel {
+    --bs-border-color: var(--lesson-border);
+    background-color: var(--lesson-surface);
+}
+
+/* Give form labels emphasis and controls comfortable pointer/touch targets. */
+#app .form-label {
+    font-weight: 600;
+}
+
+#app .form-control,
+#app .form-select,
+#app .btn {
+    min-height: 2.75rem;
+}
+
+/* Add an obvious keyboard outline alongside Bootstrap's own focus styles. */
+#app .btn:focus-visible,
+#app .form-control:focus-visible,
+#app .form-select:focus-visible {
+    outline: 3px solid var(--lesson-focus);
+    outline-offset: 3px;
+}
+
+/* Keep lesson and cart cards simple, with a light border and subtle separation. */
+#app .card {
+    border-color: var(--lesson-border);
+    box-shadow: 0 2px 8px rgb(36 50 71 / 4%);
+}
+
+#app .card-body {
+    min-width: 0;
+    padding: 1.25rem;
+}
+
+#app .card-title {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+#app .card-text {
+    margin-bottom: 0.5rem;
+    color: var(--lesson-muted);
+    overflow-wrap: anywhere;
+}
+
+#app .card-body .btn {
+    margin-top: 0.5rem;
+}
+
+/* Use consistent image heights on small screens; cover can crop image edges. */
+#app .card-img-top {
+    height: 12rem;
+    object-fit: cover;
+    background-color: var(--lesson-border);
+}
+
+/* From Bootstrap's md breakpoint, place lesson images beside their details. */
+@media (min-width: 768px) {
+    #app .card {
+        flex-direction: row;
+    }
+
+    #app .card-img-top {
+        width: 14rem;
+        height: auto;
+        min-height: 14rem;
+        flex-shrink: 0;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: var(--bs-card-inner-border-radius, 0.375rem);
+    }
+}
+
+/* On phones, put the title above the header buttons and keep card padding compact. */
+@media (max-width: 575.98px) {
+    #app > .site-header h1 {
+        flex-basis: 100%;
+    }
+
+    #app > .site-header > .btn {
+        flex-grow: 1;
+    }
+
+    #app .card-body {
+        padding: 1rem;
+    }
+}
