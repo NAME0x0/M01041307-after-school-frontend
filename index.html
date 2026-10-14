@@ -24,51 +24,62 @@
     <!-- Vue mounts at #app; all template bindings stay inside this container. -->
     <div id="app" class="container py-4">
         <!-- ============================== HEADER ============================== -->
-        <h1>{{ sitename }}</h1>
+        <!-- Bootstrap: flex utilities align the header and let its buttons wrap on smaller screens. -->
+        <header class="site-header d-flex flex-wrap align-items-center gap-2 mb-4">
+            <h1 class="h2 me-auto mb-0">{{ sitename }}</h1>
 
-        <!-- Country choice (extra): allow switching after a country is selected. -->
-        <button type="button" v-if="country" v-on:click="switchCountry">Switch Country</button>
+            <!-- Country choice (extra): allow switching after a country is selected. -->
+            <button type="button" class="btn btn-outline-secondary" v-if="country" v-on:click="switchCountry">
+                Switch Country
+            </button>
 
-        <!--
-            Shopping cart (5%): show the number of spaces in the cart and toggle pages.
-            Allow returning to lessons even after the last cart item is removed.
-        -->
-        <button
-            type="button"
-            v-bind:disabled="cartCount === 0 && !showCartPage"
-            v-on:click="toggleCartPage"
-        >
-            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-            {{ showCartPage ? 'Back to lessons' : 'Cart' }} ({{ cartCount }})
-        </button>
+            <!--
+                Shopping cart (5%): show the number of spaces in the cart and toggle pages.
+                Allow returning to lessons even after the last cart item is removed.
+            -->
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                v-bind:disabled="cartCount === 0 && !showCartPage"
+                v-on:click="toggleCartPage"
+            >
+                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                {{ showCartPage ? 'Back to lessons' : 'Cart' }} ({{ cartCount }})
+            </button>
+        </header>
 
         <!-- ========================== COUNTRY QUESTION ======================== -->
         <!-- Country choice (extra): select a country before opening either page. -->
-        <div v-if="!country">
-            <h2>Where are you?</h2>
-            <button type="button" v-on:click="chooseCountry('UAE')">UAE</button>
-            <button type="button" v-on:click="chooseCountry('UK')">UK</button>
+        <!-- Bootstrap: border, padding and button classes give the country prompt a simple panel. -->
+        <div v-if="!country" class="panel border rounded p-3">
+            <h2 class="h4 mb-3">Where are you?</h2>
+            <button type="button" class="btn btn-primary me-2" v-on:click="chooseCountry('UAE')">UAE</button>
+            <button type="button" class="btn btn-primary" v-on:click="chooseCountry('UK')">UK</button>
         </div>
 
         <!-- ============================ LESSONS PAGE ========================== -->
         <!-- Show browsing controls and lessons when the cart page is closed. -->
         <div v-else-if="!showCartPage">
-            <h2>Lessons</h2>
+            <h2 class="h4 mb-3">Lessons</h2>
 
             <!-- Search challenge (6%): bind the text and search when the button is clicked. -->
+            <!-- Bootstrap: form classes style the input; input-group joins it to the search button. -->
             <div class="mb-3">
-                <label for="lesson-search">Search lessons</label>
-                <input id="lesson-search" type="search" v-model="searchText" placeholder="Search lessons...">
-                <button type="button" v-on:click="searchLessons">Search</button>
+                <label for="lesson-search" class="form-label">Search lessons</label>
+                <div class="input-group">
+                    <input id="lesson-search" type="search" class="form-control" v-model="searchText" placeholder="Search lessons...">
+                    <button type="button" class="btn btn-primary" v-on:click="searchLessons">Search</button>
+                </div>
             </div>
 
             <!--
                 Teachers challenge (8%): filterByTeacher reads the selected teacher's ID.
                 The empty option shows all lessons again.
             -->
+            <!-- Bootstrap: form-select and form-label style the teacher filter consistently. -->
             <div class="mb-3">
-                <label for="teacher-filter">Teacher</label>
-                <select id="teacher-filter" v-model="selectedTeacher" v-on:change="filterByTeacher">
+                <label for="teacher-filter" class="form-label">Teacher</label>
+                <select id="teacher-filter" class="form-select" v-model="selectedTeacher" v-on:change="filterByTeacher">
                     <option value="">All Teachers</option>
                     <option v-for="teacher in teachers" v-bind:key="teacher.id" v-bind:value="teacher.id">
                         {{ teacher.name }}
@@ -77,23 +88,29 @@
             </div>
 
             <!-- Sort (8%): choose the property and ascending or descending order. -->
-            <div class="mb-3">
-                <label for="sort-by">Sort by</label>
-                <select id="sort-by" v-model="sortBy">
-                    <option value="topic">Subject</option>
-                    <option value="location">Location</option>
-                    <option value="price">Price</option>
-                    <option value="space">Spaces</option>
-                </select>
+            <!-- Bootstrap: grid columns stack on small screens and sit side by side from the sm breakpoint. -->
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label for="sort-by" class="form-label">Sort by</label>
+                    <select id="sort-by" class="form-select" v-model="sortBy">
+                        <option value="topic">Subject</option>
+                        <option value="location">Location</option>
+                        <option value="price">Price</option>
+                        <option value="space">Spaces</option>
+                    </select>
+                </div>
 
-                <label for="sort-order">Order</label>
-                <select id="sort-order" v-model="sortOrder">
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                </select>
+                <div class="col-sm-6">
+                    <label for="sort-order" class="form-label">Order</label>
+                    <select id="sort-order" class="form-select" v-model="sortOrder">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Lesson list (7%): show each lesson's image, subject, location, price and spaces. -->
+            <!-- Bootstrap: card classes group lesson details; h5 makes their h3 headings visually compact. -->
             <div v-for="lesson in sortedLessons" v-bind:key="lesson.id" class="card mb-3">
                 <img
                     v-bind:src="API_URL + '/images/' + lesson.image"
@@ -101,7 +118,7 @@
                     class="card-img-top"
                 >
                 <div class="card-body">
-                    <h3 class="card-title">{{ lesson.topic }}</h3>
+                    <h3 class="card-title h5">{{ lesson.topic }}</h3>
                     <p class="card-text">Location: {{ lesson.location }}</p>
                     <p class="card-text">Price: {{ lesson.price }} {{ lesson.currency }}</p>
                     <p class="card-text">Spaces left: {{ lesson.space }}</p>
@@ -121,11 +138,12 @@
 
         <!-- ============================== CART PAGE =========================== -->
         <!-- Cart page (5%): list selected lessons and remove an item by its position. -->
+        <!-- Bootstrap: heading utilities match the cart typography to the lessons page. -->
         <div v-else>
-            <h2>Shopping Cart</h2>
+            <h2 class="h4 mb-3">Shopping Cart</h2>
             <div v-for="(lesson, index) in cartLessons" v-bind:key="index" class="card mb-3">
                 <div class="card-body">
-                    <h3 class="card-title">{{ lesson.topic }}</h3>
+                    <h3 class="card-title h5">{{ lesson.topic }}</h3>
                     <p class="card-text">Location: {{ lesson.location }}</p>
                     <p class="card-text">Price: {{ lesson.price }} {{ lesson.currency }}</p>
                     <button type="button" class="btn btn-danger" v-on:click="removeFromCart(index)">
@@ -140,17 +158,19 @@
                 Require letters only for the name and digits only for the phone.
                 canCheckout controls the button; validation belongs in app.js.
             -->
-            <div>
-                <h3>Checkout</h3>
+            <!-- Bootstrap: separate checkout with a bordered panel and use the same form styles. -->
+            <div class="panel border rounded p-3 mt-4">
+                <h3 class="h5 mb-3">Checkout</h3>
                 <div class="mb-3">
-                    <label for="customer-name">Name</label>
-                    <input id="customer-name" type="text" v-model="customerName" autocomplete="name" placeholder="Name">
+                    <label for="customer-name" class="form-label">Name</label>
+                    <input id="customer-name" type="text" class="form-control" v-model="customerName" autocomplete="name" placeholder="Name">
                 </div>
                 <div class="mb-3">
-                    <label for="customer-phone">Phone</label>
+                    <label for="customer-phone" class="form-label">Phone</label>
                     <input
                         id="customer-phone"
                         type="tel"
+                        class="form-control"
                         v-model="customerPhone"
                         inputmode="numeric"
                         autocomplete="tel"
@@ -165,7 +185,8 @@
                 >
                     Checkout
                 </button>
-                <p v-if="orderConfirmation" role="status">{{ orderConfirmation }}</p>
+                <!-- Bootstrap: a success alert highlights the confirmation returned by the application. -->
+                <p v-if="orderConfirmation" class="alert alert-success mt-3 mb-0" role="status">{{ orderConfirmation }}</p>
             </div>
         </div>
     </div>
