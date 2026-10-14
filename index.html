@@ -29,7 +29,13 @@
             <h1 class="h2 me-auto mb-0">{{ sitename }}</h1>
 
             <!-- Country choice (extra): allow switching after a country is selected. -->
-            <button type="button" class="btn btn-outline-secondary" v-if="country" v-on:click="switchCountry">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                v-if="country"
+                v-bind:disabled="isSubmitting"
+                v-on:click="switchCountry"
+            >
                 Switch Country
             </button>
 
@@ -40,7 +46,7 @@
             <button
                 type="button"
                 class="btn btn-outline-primary"
-                v-bind:disabled="cartCount === 0 && !showCartPage"
+                v-bind:disabled="isSubmitting || (cartCount === 0 && !showCartPage)"
                 v-on:click="toggleCartPage"
             >
                 <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
@@ -48,11 +54,30 @@
             </button>
         </header>
 
+        <p v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</p>
+        <div v-if="lessonErrorMessage" class="alert alert-danger" role="alert">
+            <p class="mb-2">{{ lessonErrorMessage }}</p>
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                v-bind:disabled="isLoading || isSubmitting"
+                v-on:click="retryLessons"
+                aria-label="Retry loading lessons"
+            >
+                Retry
+            </button>
+        </div>
+        <p v-if="isLoading" role="status">Loading lessons...</p>
+
         <!-- ========================== COUNTRY QUESTION ======================== -->
         <!-- Country choice (extra): select a country before opening either page. -->
         <!-- Bootstrap: border, padding and button classes give the country prompt a simple panel. -->
         <div v-if="!country" class="panel border rounded p-3">
             <h2 class="h4 mb-3">Where are you?</h2>
+            <details class="lesson-help mb-3">
+                <summary><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Why do we ask?</summary>
+                <p>Your country determines the lessons, locations and currency shown. Switching country clears your cart.</p>
+            </details>
             <button type="button" class="btn btn-primary me-2" v-on:click="chooseCountry('UAE')">UAE</button>
             <button type="button" class="btn btn-primary" v-on:click="chooseCountry('UK')">UK</button>
         </div>
@@ -67,8 +92,16 @@
             <div class="mb-3">
                 <label for="lesson-search" class="form-label">Search lessons</label>
                 <div class="input-group">
-                    <input id="lesson-search" type="search" class="form-control" v-model="searchText" placeholder="Search lessons...">
-                    <button type="button" class="btn btn-primary" v-on:click="searchLessons">Search</button>
+                    <input
+                        id="lesson-search"
+                        type="search"
+                        class="form-control"
+                        v-model="searchText"
+                        v-bind:disabled="isSubmitting"
+                        v-on:keyup.enter="searchLessons"
+                        placeholder="Search lessons..."
+                    >
+                    <button type="button" class="btn btn-primary" v-bind:disabled="isLoading || isSubmitting" v-on:click="searchLessons">Search</button>
                 </div>
             </div>
 
@@ -79,12 +112,33 @@
             <!-- Bootstrap: form-select and form-label style the teacher filter consistently. -->
             <div class="mb-3">
                 <label for="teacher-filter" class="form-label">Teacher</label>
-                <select id="teacher-filter" class="form-select" v-model="selectedTeacher" v-on:change="filterByTeacher">
+                <select
+                    id="teacher-filter"
+                    class="form-select"
+                    v-model="selectedTeacher"
+                    v-bind:disabled="isLoading || isSubmitting"
+                    v-on:change="filterByTeacher"
+                >
                     <option value="">All Teachers</option>
                     <option v-for="teacher in teachers" v-bind:key="teacher.id" v-bind:value="teacher.id">
                         {{ teacher.name }}
                     </option>
                 </select>
+                <div v-if="teacherErrorMessage" class="alert alert-danger mt-2 mb-0" role="alert">
+                    <p class="mb-2">{{ teacherErrorMessage }}</p>
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger"
+                        v-bind:disabled="isSubmitting"
+                        v-on:click="fetchTeachers"
+                    >
+                        Retry teachers
+                    </button>
+                </div>
+                <details class="lesson-help mt-2">
+                    <summary><i class="fa-solid fa-circle-question" aria-hidden="true"></i> How does this filter work?</summary>
+                    <p>Choose a teacher to see their lessons, or All Teachers to see every lesson in your country. A new search clears the teacher selection.</p>
+                </details>
             </div>
 
             <!-- Sort (8%): choose the property and ascending or descending order. -->
@@ -109,6 +163,31 @@
                 </div>
             </div>
 
+            <details v-if="hasVisibleRatings" class="lesson-help mb-3">
+                <summary><i class="fa-solid fa-circle-question" aria-hidden="true"></i> What do the stars mean?</summary>
+                <p>Ratings are out of five and rounded to the nearest half star. Lessons without a rating do not display stars.</p>
+            </details>
+
+            <div
+                v-if="showLessonPlaceholders"
+                v-bind:class="{ 'lesson-placeholders-failed': !isLoading && lessonErrorMessage }"
+                aria-hidden="true"
+            >
+                <div v-for="placeholder in 3" v-bind:key="placeholder" class="card lesson-placeholder mb-3">
+                    <div class="card-img-top"></div>
+                    <div class="card-body">
+                        <div class="lesson-placeholder-title mb-3"></div>
+                        <div class="lesson-placeholder-rating mb-3"></div>
+                        <div class="lesson-placeholder-line mb-2"></div>
+                        <div class="lesson-placeholder-line mb-2"></div>
+                        <div class="lesson-placeholder-line mb-2"></div>
+                        <div class="lesson-placeholder-button"></div>
+                    </div>
+                </div>
+            </div>
+
+            <p v-if="!showLessonPlaceholders && !isLoading && !errorMessage && !lessonErrorMessage && sortedLessons.length === 0" class="border rounded p-3" role="status">No lessons found.</p>
+
             <!-- Lesson list (7%): show each lesson's image, subject, location, price and spaces. -->
             <!-- Bootstrap: card classes group lesson details; h5 makes their h3 headings visually compact. -->
             <div v-for="lesson in sortedLessons" v-bind:key="lesson.id" class="card mb-3">
@@ -119,6 +198,18 @@
                 >
                 <div class="card-body">
                     <h3 class="card-title h5">{{ lesson.topic }}</h3>
+                    <div v-if="ratingValue(lesson) !== null" class="lesson-rating mb-2" role="img" v-bind:aria-label="ratingLabel(lesson)">
+                        <span class="rating-stars" aria-hidden="true">
+                            <i
+                                v-for="(starClass, starIndex) in ratingStars(lesson)"
+                                v-bind:key="starIndex"
+                                v-bind:class="starClass"
+                            ></i>
+                        </span>
+                        <span class="rating-caption" aria-hidden="true">
+                            {{ ratingValue(lesson) }}/5
+                        </span>
+                    </div>
                     <p class="card-text">Location: {{ lesson.location }}</p>
                     <p class="card-text">Price: {{ lesson.price }} {{ lesson.currency }}</p>
                     <p class="card-text">Spaces left: {{ lesson.space }}</p>
@@ -141,12 +232,25 @@
         <!-- Bootstrap: heading utilities match the cart typography to the lessons page. -->
         <div v-else>
             <h2 class="h4 mb-3">Shopping Cart</h2>
+            <p v-if="cartCount === 0">Your cart is empty.</p>
             <div v-for="(lesson, index) in cartLessons" v-bind:key="index" class="card mb-3">
                 <div class="card-body">
                     <h3 class="card-title h5">{{ lesson.topic }}</h3>
+                    <div v-if="ratingValue(lesson) !== null" class="lesson-rating mb-2" role="img" v-bind:aria-label="ratingLabel(lesson)">
+                        <span class="rating-stars" aria-hidden="true">
+                            <i
+                                v-for="(starClass, starIndex) in ratingStars(lesson)"
+                                v-bind:key="starIndex"
+                                v-bind:class="starClass"
+                            ></i>
+                        </span>
+                        <span class="rating-caption" aria-hidden="true">
+                            {{ ratingValue(lesson) }}/5
+                        </span>
+                    </div>
                     <p class="card-text">Location: {{ lesson.location }}</p>
                     <p class="card-text">Price: {{ lesson.price }} {{ lesson.currency }}</p>
-                    <button type="button" class="btn btn-danger" v-on:click="removeFromCart(index)">
+                    <button type="button" class="btn btn-danger" v-bind:disabled="isSubmitting" v-on:click="removeFromCart(index)">
                         Remove
                     </button>
                 </div>
@@ -155,15 +259,27 @@
             <!-- ============================== CHECKOUT ============================ -->
             <!--
                 Checkout (6%): keep customer inputs and confirmation on the cart page.
-                Require letters only for the name and digits only for the phone.
+                Allow letter-only name words and digits-only phone numbers.
                 canCheckout controls the button; validation belongs in app.js.
             -->
             <!-- Bootstrap: separate checkout with a bordered panel and use the same form styles. -->
             <div class="panel border rounded p-3 mt-4">
                 <h3 class="h5 mb-3">Checkout</h3>
+                <details class="lesson-help mb-3">
+                    <summary><i class="fa-solid fa-circle-question" aria-hidden="true"></i> What can I enter?</summary>
+                    <p>Names allow letters and single spaces. Phone numbers allow digits only, with no spaces or + sign. Your cart must contain at least one space to enable checkout.</p>
+                </details>
                 <div class="mb-3">
                     <label for="customer-name" class="form-label">Name</label>
-                    <input id="customer-name" type="text" class="form-control" v-model="customerName" autocomplete="name" placeholder="Name">
+                    <input
+                        id="customer-name"
+                        type="text"
+                        class="form-control"
+                        v-model="customerName"
+                        v-bind:disabled="isSubmitting"
+                        autocomplete="name"
+                        placeholder="Name"
+                    >
                 </div>
                 <div class="mb-3">
                     <label for="customer-phone" class="form-label">Phone</label>
@@ -172,6 +288,7 @@
                         type="tel"
                         class="form-control"
                         v-model="customerPhone"
+                        v-bind:disabled="isSubmitting"
                         inputmode="numeric"
                         autocomplete="tel"
                         placeholder="Phone"
@@ -183,10 +300,11 @@
                     v-bind:disabled="!canCheckout"
                     v-on:click="submitOrder"
                 >
-                    Checkout
+                    {{ isSubmitting ? 'Saving...' : 'Checkout' }}
                 </button>
                 <!-- Bootstrap: a success alert highlights the confirmation returned by the application. -->
                 <p v-if="orderConfirmation" class="alert alert-success mt-3 mb-0" role="status">{{ orderConfirmation }}</p>
+                <p v-if="availabilityWarning" class="alert alert-warning mt-3 mb-0" role="alert">{{ availabilityWarning }}</p>
             </div>
         </div>
     </div>
